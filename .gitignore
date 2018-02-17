@@ -4,6 +4,7 @@
 *.so
 
 # Packages
+.eggs
 *.egg
 *.egg-info
 dist
@@ -43,11 +44,9 @@ nosetests.xml
 # Django
 /django/notejam/static/
 
-# Node.js modules
-node_modules
+# Ansible
+*.retry
 
-# Bowe components
-bower_components
-
-#.phar archives
-*.phar
+# Vagrant
+.vagrant
+vagrant/*.log

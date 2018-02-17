@@ -1,0 +1,23 @@
+# -*- mode: ruby -*-
+
+Vagrant.configure(2) do |config|
+  config.vm.define "web", primary: true do |web|
+    web.vm.box = "ubuntu/xenial64"
+    web.vm.box_version = "20180215.0.0"
+    web.vm.hostname = "web.local"
+    web.vm.network "private_network", ip: "192.168.10.100"
+    web.vm.network "forwarded_port", guest: 8000, host: 8000
+    web.vm.synced_folder "../", "/home/vagrant/notejam"
+    web.vm.provision "ansible" do |ansible|
+      ansible.playbook = "../provision_scripts/vagrant.yml"
+      ansible.verbose = "y"
+    end
+
+    web.vm.provider :virtualbox do |vb|
+      vb.name = "notejam"
+      vb.memory = 1024
+      vb.cpus = 2
+    end
+  end
+end
+

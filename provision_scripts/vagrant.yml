@@ -1,0 +1,44 @@
+- hosts: all
+  vars:
+    venv_path: /home/vagrant/
+    source_root: /home/vagrant/notejam
+  become_method: sudo
+  gather_facts: false
+  pre_tasks:
+    - raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+      changed_when: False
+      become: true
+    - setup: # aka gather_facts
+  tasks:
+  - name: Update apt-get cache
+    become: true
+    apt: cache_valid_time=7200 update_cache=true
+  - name: Install required packages
+    become: true
+    apt: name={{item}} state=present
+    with_items:
+      - python3-pip
+      - python3-virtualenv
+      - virtualenv
+  - name: Create virtualenv
+    command: virtualenv {{ venv_path }} --no-site-packages -p python3.5 creates="{{ venv_path }}/bin"
+  - name: Install requirements (local_dev)
+    pip:
+      requirements=/home/vagrant/notejam/requirements/dev.txt
+      virtualenv={{ venv_path }}
+  - name: Install notejam locally
+    pip:
+      name=file://{{ source_root }}
+      extra_args="-e"
+      virtualenv={{ venv_path }}
+  - name: Create ~/.profile file
+    copy:
+      content: |
+        source {{venv_path}}/bin/activate
+        export DJANGO_SETTINGS_MODULE=settings.dev
+        export PROJECT_PATH={{ source_root }}
+        cd notejam
+        echo
+        echo "To start server run notejam runserver 0.0.0.0:8000"
+        echo
+      dest: /home/vagrant/.profile
