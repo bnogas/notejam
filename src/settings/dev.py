@@ -1,1 +1,1 @@
-from settings.base import *  # noqa
+from settings.tests import *  # noqa
