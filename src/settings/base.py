@@ -131,7 +131,6 @@ INSTALLED_APPS = (
     'pads',
     'notes',
     'users',
-    'south',
 )
 
 AUTHENTICATION_BACKENDS = (
