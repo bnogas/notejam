@@ -54,8 +54,23 @@
       become: true
     - setup: # aka gather_facts
   tasks:
+    - name: Add apt-key for jenkins repository
+      become: true
+      apt_key:
+        url: https://pkg.jenkins.io/debian/jenkins-ci.org.key
+        state: present
+    - name: Add jenkins apt repository
+      become: true
+      apt_repository:
+        repo: deb-src http://pkg.jenkins.io/debian-stable binary
+        state: present
     - name: Update apt-get cache
       become: true
       apt: cache_valid_time=7200 update_cache=true
-
+    - name: Install required packages
+        become: true
+        apt: name={{item}} state=present
+        with_items:
+          - openjdk-8-jre-headless
+          - jenkins
 
