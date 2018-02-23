@@ -1,0 +1,30 @@
+{
+  "Statement": [
+    {
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:{{ aws_region }}:{{ aws_account_id}}:log-group:*",
+      "Effect": "Allow"
+    },
+    {
+      "Action": [
+        "s3:GetObject",
+        "s3:GetObjectVersion",
+        "s3:PutObject"
+      ],
+      "Resource": "arn:aws:s3:::codepipeline-{{ aws_region}}-*/*",
+      "Effect": "Allow"
+    },
+    {
+      "Action": [
+        "ssm:GetParameters"
+      ],
+      "Resource": "arn:aws:ssm:{{ aws_region }}:{{ aws_account_id }}:parameter/CodeBuild/*",
+      "Effect": "Allow"
+    }
+  ],
+  "Version": "2012-10-17"
+}

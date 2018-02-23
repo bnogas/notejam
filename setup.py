@@ -32,8 +32,4 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.5',
     ],
-    setup_requires=['vcversioner'],
-    vcversioner={
-        'version_file': 'APP_VERSION_FROM_VCVERSIONER',
-    },
 )

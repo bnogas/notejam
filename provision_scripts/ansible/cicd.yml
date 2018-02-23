@@ -1,0 +1,6 @@
+- hosts: localhost
+  gather_facts: false
+  vars:
+    aws_cicd_username: "notejam_cicd"
+
+
