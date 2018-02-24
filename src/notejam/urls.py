@@ -1,5 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 
 from users.views import (SignupView, SigninView, AccountSettingsView,
 ForgotPasswordView)
@@ -20,6 +21,8 @@ urlpatterns = patterns('',
     url(r'^notes/', include('notes.urls')),
     # pads
     url(r'^pads/', include('pads.urls')),
+
+    url(r"^status/ping", lambda r: HttpResponse()),
 
     url(r'^$', login_required(NoteListView.as_view()), name='home'),
 )
