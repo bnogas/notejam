@@ -1,0 +1,11 @@
+---
+  - name: Create notejam EC2 key
+    ec2_key:
+      name: notejam_ec2_key
+    register: ec2_key
+  - name: save private key
+    copy:
+      content: "{{ ec2_key.key.private_key }}"
+      dest: "{{ dest }}"
+      mode: 0600
+    when: ec2_key.changed

@@ -1,0 +1,31 @@
+---
+  - name: Create "{{ app_name }}" cluster
+    ecs_cluster:
+      name: "{{app_name}}-ecs"
+      state: present
+  - name: Create ecs task definition
+    ecs_taskdefinition:
+      family: notejam
+      state: present
+      containers:
+      - name: notejam
+        essential: true
+        memory: 800
+        image: "{{ aws_account_id }}.dkr.ecr.{{ aws_region }}.amazonaws.com/notejam:latest"
+        portMappings:
+        - containerPort: 8000
+          hostPort: 80
+  - name: Create notejam service
+    ecs_service:
+      name: "{{ app_name }}-svc"
+      state: present
+      cluster: "{{app_name}}-ecs"
+      desired_count: 1
+      task_definition: notejam
+      load_balancers: [
+        {loadBalancerName: "{{ lb_name }}", containerName: notejam, containerPort: 8000 }
+      ]
+      role: "arn:aws:iam::{{ aws_account_id }}:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS"
+
+
+

@@ -1,0 +1,47 @@
+---
+  - name: Set initial facts
+    set_fact:
+      vpc_name: "{{ app_name }}-vpc"
+  - name: Create VPC for staging
+    ec2_vpc_net:
+      name: "{{ vpc_name }}"
+      state: present
+      cidr_block: "{{ vpc_subnet }}"
+      resource_tags: { "env":"staging" }
+    register: vpc
+  - name:               Set VPC ID in variable
+    set_fact:
+      vpc_id:           "{{ vpc.vpc.id }}"
+  - name: "Create Subnet for {{ vpc_name }}"
+    ec2_vpc_subnet:
+      state: present
+      vpc_id: "{{ vpc_id }}"
+      cidr: "{{ vpc_web_subnet }}"
+      region: "{{ aws_region }}"
+      az:  "{{ aws_region }}a"
+      resource_tags:
+        Name: "{{ vpc_name }} public subnet"
+    register: web_subnet
+  - name: "Set Public Subnet id fact"
+    set_fact:
+      web_subnet_id: "{{ web_subnet.subnet.id }}"
+  - name: "Create VPC Internet Gateway for {{ vpc_name }}"
+    ec2_vpc_igw:
+      vpc_id: "{{ vpc_id }}"
+      region: "{{ aws_region }}"
+      state: "present"
+    register: vpc_igw
+  - name: "Set fact for {{ vpc_name }} igw ID"
+    set_fact:
+      igw_id: "{{ vpc_igw.gateway_id }}"
+  - name: "Set public subnet routes for {{ vpc_name }}"
+    ec2_vpc_route_table:
+      vpc_id:           "{{ vpc_id }}"
+      region:           "{{ aws_region }}"
+      tags:
+        Name:           "Public"
+      subnets:
+        - "{{ web_subnet_id }}"
+      routes:
+        - dest:         "0.0.0.0/0"
+          gateway_id:   "{{ igw_id }}"

@@ -6,7 +6,7 @@
     aws_secret_key: "{{ lookup('env', 'AWS_ADMIN_SECRET_KEY') }}"
     aws_account_id: "{{ lookup('env', 'AWS_ACCOUNT_ID') }}"
     aws_region: "{{ lookup('env', 'AWS_REGION') }}"
-
+    elb_access_ids: ["033677994240"]
   tasks:
   - name: Create CICD user
     iam:
@@ -22,6 +22,7 @@
     with_items:
      - "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
      - "arn:aws:iam::aws:policy/AWSCodePipelineFullAccess"
+     - "arn:aws:iam::aws:policy/AmazonECS_FullAccess"
   - name: Create ECR repository
     ecs_ecr:
       name: notejam
@@ -49,6 +50,32 @@
         }
       managed_policy:
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser
+  - name: Create role for ecsInstance
+    iam_role:
+      name: ecsInstanceRole
+      state: present
+      aws_access_key: "{{ aws_access_key }}"
+      aws_secret_key: "{{ aws_secret_key }}"
+      assume_role_policy_document: |
+        {
+          "Version": "2008-10-17",
+          "Statement": [
+            {
+              "Sid": "",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        }
+      managed_policy:
+        - "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+  - name: Create service role for ecs
+    command: "aws iam create-service-linked-role --aws-service-name ecs.amazonaws.com"
+    ignore_errors: true
+
   - name: Grant permissions to notejam-codebuild-role
     iam_policy:
       iam_type: role
@@ -87,34 +114,3 @@
       policy_name: notejam-codepipeline-policy
       state: present
       policy_document: files/codepipeline_policy.json
-  - name: Create notejam ecs cluster
-    ecs_cluster:
-      aws_access_key: "{{ aws_access_key }}"
-      aws_secret_key: "{{ aws_secret_key }}"
-      name: notejam_ecs
-      state: present
-  - name: Create ecs task definition
-    ecs_taskdefinition:
-      family: notejam-web
-      state: present
-      aws_access_key: "{{ aws_access_key }}"
-      aws_secret_key: "{{ aws_secret_key }}"
-      containers:
-      - name: notejam-web
-        cpu: 10
-        essential: true
-        image: "{{ aws_account_id }}.dkr.ecr.{{ aws_region }}.amazonaws.com/notejam:latest"
-        memory: 100
-        portMappings:
-        - containerPort: 8000
-          hostPort: 80
-  - name: Create notejam service
-    ecs_service:
-      name: notejam_ecs_svc
-      state: present
-      aws_access_key: "{{ aws_access_key }}"
-      aws_secret_key: "{{ aws_secret_key }}"
-      cluster: notejam_ecs
-      desired_count: 0
-      task_definition: notejam-web
-

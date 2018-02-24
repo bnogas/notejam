@@ -1,0 +1,38 @@
+---
+
+  - name: "Create security group for {{ vpc_name }}"
+    ec2_group:
+      name: "{{ app_name }}"
+      vpc_id: "{{ vpc_id }}"
+      description: "Group to use with {{ vpc_name }}"
+      rules:
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: "{{ vpc_subnet }}"
+
+  - name: Create staging instances lunch configuration
+    ec2_lc:
+      name: "{{ app_name }}_lc"
+      key_name: notejam_ec2_key
+      assign_public_ip: yes
+      security_groups: ["{{ app_name }}"]
+      image_id: "{{ ami_ecs_optimized }}"
+      instance_type: t2.micro
+      instance_profile_name: "ecsInstanceRole"
+      user_data: |
+        #!/bin/bash
+        echo ECS_CLUSTER=notejam_ecs_staging >> /etc/ecs/ecs.config
+  - name: Lunch asg ec2 for staging
+    ec2_asg:
+      name: "{{ app_name }}_asg"
+      launch_config_name: "{{ app_name }}_lc"
+      health_check_period: 60
+      health_check_type: ELB
+      min_size: 2
+      max_size: 6
+      vpc_zone_identifier: ["{{ web_subnet_id}}"]
+      desired_capacity: 3
+      wait_for_instances: true
+      tags: [{ecs_cluster: "{{ app_name }}_ecs"}]
+

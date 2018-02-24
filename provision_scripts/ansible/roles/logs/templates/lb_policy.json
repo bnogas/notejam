@@ -1,0 +1,16 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Action": [
+        "s3:PutObject"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:s3:::{{ app_name }}-logs/lb/AWSLogs/{{ aws_account_id }}/*",
+      "Principal": {
+        "AWS": {{ elb_access_ids | to_json }}
+      }
+    }
+  ]
+}

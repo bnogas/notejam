@@ -1,0 +1,8 @@
+---
+  - name: "Create bucket {{ app_name }}-logs"
+    aws_s3:
+      bucket: "{{ app_name }}-logs"
+      permission: private
+      mode: create
+  - name: "Add policy for lb"
+    command: "aws s3api put-bucket-policy --bucket {{ app_name }}-logs --policy \'{{ lookup('template', 'lb_policy.json') | to_nice_json}}\'"

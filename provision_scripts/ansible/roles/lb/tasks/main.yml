@@ -1,0 +1,25 @@
+---
+  - name: "Set fact with load balancer name {{ app_name}}-lb"
+    set_fact:
+      lb_name: "{{app_name}}-lb"
+  - name: "Create lb configuration - {{ app_name }}"
+    ec2_elb_lb:
+      name: "{{ lb_name }}"
+      state: present
+      zones: "{{ zones }}"
+      listeners:
+        - protocol: http
+          load_balancer_port: 80
+          instance_port: 80
+      health_check:
+        ping_protocol: http
+        ping_port: 80
+        ping_path: "/status/ping"
+        response_timeout: 5
+        interval: 30
+        unhealthy_threshold: 2
+        healthy_threshold: 10
+      access_logs:
+        s3_location: "{{ app_name }}-logs"
+        s3_prefix: "lb"
+
