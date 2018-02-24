@@ -1,7 +1,11 @@
 ---
+  - name: Set facts for ecs cluster
+    set_fact:
+      ecs_cluster_name: "{{ app_name }}-ecs"
+      ecs_service_name: "{{ app_name }}-svc"
   - name: Create "{{ app_name }}" cluster
     ecs_cluster:
-      name: "{{app_name}}-ecs"
+      name: "{{ ecs_cluster_name }}"
       state: present
   - name: Create ecs task definition
     ecs_taskdefinition:
@@ -17,10 +21,10 @@
           hostPort: 80
   - name: Create notejam service
     ecs_service:
-      name: "{{ app_name }}-svc"
+      name: "{{ ecs_service_name }}"
       state: present
-      cluster: "{{app_name}}-ecs"
-      desired_count: 1
+      cluster: "{{ecs_cluster_name}}"
+      desired_count: 2
       task_definition: notejam
       load_balancers: [
         {loadBalancerName: "{{ lb_name }}", containerName: notejam, containerPort: 8000 }

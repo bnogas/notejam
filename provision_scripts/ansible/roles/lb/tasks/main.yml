@@ -6,7 +6,7 @@
     ec2_elb_lb:
       name: "{{ lb_name }}"
       state: present
-      zones: "{{ zones }}"
+      subnets: "{{ subnets }}"
       listeners:
         - protocol: http
           load_balancer_port: 80

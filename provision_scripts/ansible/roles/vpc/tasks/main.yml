@@ -7,24 +7,31 @@
       name: "{{ vpc_name }}"
       state: present
       cidr_block: "{{ vpc_subnet }}"
-      resource_tags: { "env":"staging" }
+      resource_tags: { "env": "{{ app_name }}" }
     register: vpc
   - name:               Set VPC ID in variable
     set_fact:
       vpc_id:           "{{ vpc.vpc.id }}"
-  - name: "Create Subnet for {{ vpc_name }}"
+  - name: "Create Subnet for {{ vpc_name }} - {{ item.az }}"
     ec2_vpc_subnet:
       state: present
       vpc_id: "{{ vpc_id }}"
-      cidr: "{{ vpc_web_subnet }}"
-      region: "{{ aws_region }}"
-      az:  "{{ aws_region }}a"
+      cidr: "{{ item.cidr }}"
+      region: "{{ item.region }}"
+      az:  "{{ item.az }}"
       resource_tags:
-        Name: "{{ vpc_name }} public subnet"
+        Name: "{{ vpc_name }}"
+    with_items:
+      "{{ subnets }}"
     register: web_subnet
-  - name: "Set Public Subnet id fact"
+  - name: "Gather facts about created vpc subnets"
+    ec2_vpc_subnet_facts:
+      filters:
+        "tag:Name": "{{vpc_name}}"
+    register: vpc_subnets
+  - name: "Set vpc subnets ids fact"
     set_fact:
-      web_subnet_id: "{{ web_subnet.subnet.id }}"
+      vpc_subnets_ids: "{{ vpc_subnets.subnets |map(attribute='id') |list}}"
   - name: "Create VPC Internet Gateway for {{ vpc_name }}"
     ec2_vpc_igw:
       vpc_id: "{{ vpc_id }}"
@@ -40,8 +47,7 @@
       region:           "{{ aws_region }}"
       tags:
         Name:           "Public"
-      subnets:
-        - "{{ web_subnet_id }}"
+      subnets: "{{ vpc_subnets_ids }}"
       routes:
         - dest:         "0.0.0.0/0"
           gateway_id:   "{{ igw_id }}"
