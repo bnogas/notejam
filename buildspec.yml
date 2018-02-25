@@ -13,6 +13,8 @@ phases:
       - echo Build started on `date`
       - echo Building the Docker image...
       - docker build -t $REPOSITORY_URI:latest -f docker/Dockerfile .
+      - echo Running tests in docker
+      - docker run -t --rm $REPOSITORY_URI:latest  "make -C /opt/notejam/notejam tests-docker"
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
   post_build:
     commands:
