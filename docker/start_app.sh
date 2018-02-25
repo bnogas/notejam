@@ -1,6 +1,5 @@
 #!/bin/sh
 
-set -x
 set -e
 
 . ${PROJECT_PATH}/virt/bin/activate
@@ -12,7 +11,7 @@ notejam migrate --noinput
 notejam collectstatic --clear --noinput
 notejam collectstatic --noinput
 python ${PROJECT_PATH}/notejam/docker/create_superuser.py
-gunicorn --config=${PROJECT_PATH}/gunicorn.py.ini notejam.wsgi &
-tail -n0 -f /var/log/nginx/*log
-service nginx start
+tail -n0 -f /var/log/nginx/*log &
+echo `sleep 5 ; service nginx start` &
+gunicorn --config=${PROJECT_PATH}/gunicorn.py.ini notejam.wsgi
 
