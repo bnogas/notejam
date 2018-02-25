@@ -57,6 +57,7 @@
       src: "/tmp/{{ db_config_file }}"
       overwrite: true
       mode: put
+    when: db.changed
   - name: "Save credentials to db to a file"
     copy:
       content: |

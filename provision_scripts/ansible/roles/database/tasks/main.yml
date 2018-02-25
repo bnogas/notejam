@@ -1,0 +1,51 @@
+---
+  - name: "Create security group for {{ vpc_name }}"
+    ec2_group:
+      name: "{{ app_name }}-db"
+      vpc_id: "{{ vpc_id }}"
+      description: "Group to use with {{ vpc_name }} dbs"
+      rules:
+        - proto: tcp
+          from_port: 3306
+          to_port: 3306
+          group_id: "{{ web_group.group_id }}"
+    register: db_group
+  - name: "Generate db_password"
+    set_fact:
+      db_pass: "{{ pwd_alias }}"
+      db_name: "{{ app_name | replace('-','_')}}"
+  - name: "Create rds subnet group for {{ app_name }}"
+    rds_subnet_group:
+      state: present
+      name: "rds-subnet-{{ app_name }}"
+      description: "subnet group for {{ app_name }}"
+      subnets: "{{ vpc_subnets_ids }}"
+  - name: "Create database {{ app_name }}"
+    rds:
+      command: create
+      instance_name: "{{ app_name }}"
+      db_engine: MySQL
+      db_name: "{{ db_name }}"
+      size: 10
+      instance_type: db.t2.micro
+      backup_retention: "{{ backup_retention }}"
+      username: "{{ db_name }}"
+      password: "{{ db_pass }}"
+      subnet: "rds-subnet-{{ app_name }}"
+      vpc_security_groups: "{{ db_group.group_id }}"
+      wait: false
+      tags:
+        Name: "{{ app_name }}"
+    register: db
+  - name: "Set fact with db configuration file path"
+    set_fact:
+      db_config_file: "db_config-{{app_name}}.sh"
+  - name: "Save credentials to db to a file"
+    copy:
+      content: |
+        export DB_PASSWORD={{ db_pass }}
+        export DB_NAME={{ db_name }}
+        export DB_USER={{ db_name }}
+        export DB_ADDRESS=SET_ME
+      dest: "/tmp/{{ db_config_file }}"
+    when: db.changed

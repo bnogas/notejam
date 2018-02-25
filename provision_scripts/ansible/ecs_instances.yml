@@ -1,48 +1,29 @@
 - hosts: localhost
   gather_facts: false
   vars:
+    app_name: "notejam-staging"
     ami_ecs_optimized: ami-b86a5ddd
     aws_account_id: "{{ lookup('env', 'AWS_ACCOUNT_ID') }}"
     aws_region: "{{ lookup('env', 'AWS_REGION') }}"
     # look https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-access-logs.html#attach-bucket-policy
     elb_access_ids: ["033677994240"]
-    vpc_subnets_staging: [
-    { cidr: 172.23.0.0/24, region: us-east-2, az: us-east-2a }
+    subnets: [
+    { cidr: 172.23.0.0/24, region: us-east-2, az: us-east-2a },
+    { cidr: 172.23.1.0/24, region: us-east-2, az: us-east-2b }
     ]
-    vpc_net_staging: 172.23.0.0/16
+    pwd_alias: "{{ lookup('password', '/dev/null length=15 chars=ascii_letters') }}"
+    vpc_net: 172.23.0.0/16
   roles:
-    - {
-        role:           logs,
-        app_name:       "notejam-staging",
-      }
-    - {role: ec2_key, dest: "~/.ssh/notejam-private.pem"}
-    - {
-        role:       vpc,
-        app_name:   notejam-staging,
-        vpc_subnet: "{{ vpc_net_staging }}",
-        subnets:    "{{ vpc_subnets_staging }}",
-        aws_region: "{{ lookup('env', 'AWS_REGION') }}",
-      }
+    - { role: logs }
+    - { role: ec2_key, dest: "~/.ssh/notejam-private.pem" }
+    - { role: vpc }
     - {
         role: lb,
-        app_name: "notejam-staging",
         subnets: "{{ vpc_subnets_ids }}",
         elb_access_ids: "{{ elb_access_ids }}"
       }
-    - { role: ecs, app_name: "notejam-staging" }
-    - {
-        role:        asg,
-        app_name:   "notejam-staging",
-        vpc_subnet:  172.23.0.0/16,
-        min_size:    1,
-        max_size:    3,
-        size:        2,
-      }
-    - {
-        role:           vpc,
-        vpc_name:       notejam_prod_vpc,
-        vpc_subnet:     172.22.0.0/16,
-        vpc_web_subnet: 172.22.0.0/24,
-        aws_region:     "{{ lookup('env', 'AWS_REGION') }}",
-      }
+    - { role: database, app_name: "notejam-staging", backup_retention: 1}
+    - { role: ecs_cluster }
+    - { role: asg, size: 2 }
+    - { role: ecs_service }
   tasks:

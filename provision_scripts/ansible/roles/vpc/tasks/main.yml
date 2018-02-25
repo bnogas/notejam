@@ -6,7 +6,7 @@
     ec2_vpc_net:
       name: "{{ vpc_name }}"
       state: present
-      cidr_block: "{{ vpc_subnet }}"
+      cidr_block: "{{ vpc_net }}"
       resource_tags: { "env": "{{ app_name }}" }
     register: vpc
   - name:               Set VPC ID in variable
@@ -51,3 +51,14 @@
       routes:
         - dest:         "0.0.0.0/0"
           gateway_id:   "{{ igw_id }}"
+  - name: "Create security group for {{ vpc_name }}"
+    ec2_group:
+      name: "{{ app_name }}"
+      vpc_id: "{{ vpc_id }}"
+      description: "Group to use with {{ vpc_name }}"
+      rules:
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: "{{ vpc_net }}"
+    register: web_group

@@ -6,3 +6,6 @@
       mode: create
   - name: "Add policy for lb"
     command: "aws s3api put-bucket-policy --bucket {{ app_name }}-logs --policy \'{{ lookup('template', 'lb_policy.json') | to_nice_json}}\'"
+  - name: "Create log group for {{ app_name }}"
+    command: "aws logs create-log-group --log-group-name {{ app_name }} --region {{ aws_region }}"
+    ignore_errors: true
