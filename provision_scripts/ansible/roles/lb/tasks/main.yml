@@ -1,4 +1,15 @@
 ---
+  - name: "Create security group for lb"
+    ec2_group:
+      name: "{{ app_name }}_public_http"
+      vpc_id: "{{ vpc_id }}"
+      description: "Group to use for public http access in {{ vpc_id }}"
+      rules:
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: 0.0.0.0/0
+    register: public_http_group
   - name: "Set fact with load balancer name {{ app_name}}-lb"
     set_fact:
       lb_name: "{{app_name}}-lb"
@@ -7,6 +18,7 @@
       name: "{{ lb_name }}"
       state: present
       subnets: "{{ vpc_subnets_ids }}"
+      security_group_ids: ["{{ public_http_group.group_id }}"]
       listeners:
         - protocol: http
           load_balancer_port: 80
