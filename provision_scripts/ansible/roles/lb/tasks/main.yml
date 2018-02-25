@@ -6,7 +6,7 @@
     ec2_elb_lb:
       name: "{{ lb_name }}"
       state: present
-      subnets: "{{ subnets }}"
+      subnets: "{{ vpc_subnets_ids }}"
       listeners:
         - protocol: http
           load_balancer_port: 80

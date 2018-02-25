@@ -70,11 +70,12 @@
       src: "/tmp/secret_env.sh"
       overwrite: false
       mode: put
+    when: db.changed
   - name: Create ecs task definition
     ecs_taskdefinition:
       family: "{{ app_name }}"
       state: present
-      task_role_arn: "arn:aws:iam::{{aws_account_id}}:role/notejam-staging-ps"
+      task_role_arn: "arn:aws:iam::{{aws_account_id}}:role/{{ parameter_store_bucket }}"
       containers:
       - name: notejam
         essential: true

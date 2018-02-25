@@ -1,6 +1,7 @@
 ---
 subnets: [
-    {cidr: 172.23.0.0/24, region: us-east-2, az: us-east-2a},
-    {cidr: 172.23.1.0/24, region: us-east-2, az: us-east-2b}]
-app_name: "notejam-staging"
-vpc_net: 172.23.0.0/16
+    {cidr: 172.24.0.0/24, region: us-east-2, az: us-east-2a},
+    {cidr: 172.24.1.0/24, region: us-east-2, az: us-east-2b}]
+app_name: "notejam-prod"
+vpc_net: 172.24.0.0/16
+backup_retention: 7

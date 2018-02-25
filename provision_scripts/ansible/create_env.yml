@@ -1,18 +1,12 @@
 - hosts: localhost
   gather_facts: false
   vars:
-    app_name: "notejam-staging"
     ami_ecs_optimized: ami-b86a5ddd
     aws_account_id: "{{ lookup('env', 'AWS_ACCOUNT_ID') }}"
     aws_region: "{{ lookup('env', 'AWS_REGION') }}"
     # look https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-access-logs.html#attach-bucket-policy
     elb_access_ids: ["033677994240"]
-    subnets: [
-    { cidr: 172.23.0.0/24, region: us-east-2, az: us-east-2a },
-    { cidr: 172.23.1.0/24, region: us-east-2, az: us-east-2b }
-    ]
     pwd_alias: "{{ lookup('password', '/dev/null length=15 chars=ascii_letters') }}"
-    vpc_net: 172.23.0.0/16
   roles:
     - { role: logs }
     - { role: ec2_key, dest: "~/.ssh/notejam-private.pem" }
@@ -22,7 +16,7 @@
         subnets: "{{ vpc_subnets_ids }}",
         elb_access_ids: "{{ elb_access_ids }}"
       }
-    - { role: database, app_name: "notejam-staging", backup_retention: 1}
+    - { role: database }
     - { role: ecs_cluster }
     - { role: asg, size: 2 }
     - { role: ecs_service }

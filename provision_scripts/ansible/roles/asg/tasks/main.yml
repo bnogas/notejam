@@ -16,7 +16,7 @@
         echo ECS_CLUSTER={{ ecs_cluster_name }} >> /etc/ecs/ecs.config
         echo ECS_ENABLE_TASK_IAM_ROLE=true >> /etc/ecs/ecs.config
 
-  - name: Lunch asg ec2 for staging
+  - name: "Lunch asg ec2 for {{ app_name }}"
     ec2_asg:
       name: "{{ app_name }}_asg"
       launch_config_name: "{{ app_name }}_lc"
