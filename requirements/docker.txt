@@ -1,3 +1,5 @@
 -r base.txt
 gunicorn==19.7.1
 gevent==1.3a1
+boto3==1.5.36
+requests==2.18.4

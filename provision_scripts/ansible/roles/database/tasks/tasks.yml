@@ -1,0 +1,25 @@
+---
+  - name: "Generate db_password"
+    set_fact:
+      db_pass: "{{ pwd_alias }}"
+  - name: "Create database {{ app_name } "
+    command: create
+    instance_name: "{{ app_name }}"
+    db_engine: MySQL
+    size: 10
+    instance_type: db.t2.micro
+    backup_retention: "{{ backup_retention }}"
+    username: "{{ app_name }}"
+    password: "{{ db_pass }}"
+    tags:
+      Name: "{{ app_name }}"
+    register: db
+  - name: "Save credentials to db to a file"
+    copy:
+      content: |
+        export DB_PASSWORD={{ db_pass }}
+        export DB_NAME={{ app_name }}
+        export DB_USER={{ app_name }}
+      dest: "db_config-{{app_name}}.sh"
+    when: db.changed
+

@@ -1,0 +1,104 @@
+---
+  - name: Set facts for ecs cluster
+    set_fact:
+      ecs_service_name: "{{ app_name }}-svc"
+      parameter_store_bucket: "{{app_name}}-ps"
+      parameter_store_role: "{{app_name}}-ps"
+      parameter_store_policy: "{{app_name}}-ps-policy"
+  - name: "Create bucket {{ parameter_store_bucket }}"
+    aws_s3:
+      bucket: "{{ parameter_store_bucket }}"
+      permission: private
+      mode: create
+  - name: Create role parameter store for {{ app_name }}
+    iam_role:
+      name: "{{ parameter_store_role }}"
+      state: present
+      assume_role_policy_document: |
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        }
+  - name: "Grant permission to bucket {{ parameter_store_bucket }}"
+    iam_policy:
+      iam_type: role
+      iam_name: "{{ parameter_store_role }}"
+      policy_name: "{{ parameter_store_policy }}"
+      state: present
+      policy_json: |
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "Stmt1465589882000",
+              "Effect": "Allow",
+              "Action": [
+                "s3:GetObject"
+              ],
+              "Resource": [
+                "arn:aws:s3:::{{ parameter_store_bucket }}/*"
+              ]
+            }
+          ]
+        }
+  - name: Put credentials to database to s3 bucket
+    aws_s3:
+      bucket: "{{ parameter_store_bucket}}"
+      object: "/db_config.sh"
+      src: "/tmp/{{ db_config_file }}"
+      overwrite: true
+      mode: put
+  - name: "Save credentials to db to a file"
+    copy:
+      content: |
+        export INIT_ADMIN_PASSWORD={{ pwd_alias }}
+      dest: "/tmp/secret_env.sh"
+  - name: Put secret_env.sh to s3 bucket
+    aws_s3:
+      bucket: "{{ parameter_store_bucket}}"
+      object: "/secret_env.sh"
+      src: "/tmp/secret_env.sh"
+      overwrite: false
+      mode: put
+  - name: Create ecs task definition
+    ecs_taskdefinition:
+      family: "{{ app_name }}"
+      state: present
+      task_role_arn: "arn:aws:iam::{{aws_account_id}}:role/notejam-staging-ps"
+      containers:
+      - name: notejam
+        essential: true
+        memory: 800
+        image: "{{ aws_account_id }}.dkr.ecr.{{ aws_region }}.amazonaws.com/notejam:latest"
+        portMappings:
+        - containerPort: 8000
+          hostPort: 80
+        logConfiguration:
+          logDriver: "awslogs"
+          options:
+            awslogs-group: "{{ app_name }}"
+            awslogs-region: "{{ aws_region }}"
+            awslogs-stream-prefix: "{{app_name}}-docker"
+  - name: Create notejam service
+    ecs_service:
+      name: "{{ ecs_service_name }}"
+      state: present
+      cluster: "{{ecs_cluster_name}}"
+      desired_count: 2
+      task_definition: "{{ app_name }}"
+      load_balancers: [
+        {loadBalancerName: "{{ lb_name }}", containerName: notejam, containerPort: 8000 }
+      ]
+      role: "arn:aws:iam::{{ aws_account_id }}:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS"
+
+
+

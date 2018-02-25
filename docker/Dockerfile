@@ -4,7 +4,7 @@ MAINTAINER Bartlomiej Nogas <bart.nogas@gmail.com>
 
 # Install required packets via apt-get
 RUN apt-get update && apt-get install -y \
-    git \
+    nginx \
     python3-pip \
     python3-virtualenv \
     virtualenv \
@@ -12,7 +12,6 @@ RUN apt-get update && apt-get install -y \
 
 ENV PROJECT_PATH=/opt/notejam
 ENV PROJECT_EXEC=$PROJECT_PATH/virt/bin/notejam
-ENV PROJECT_LOGGING_FILE_PATH=$PROJECT_PATH/logs/runtime.log
 ENV DJANGO_SETTINGS_MODULE="settings.docker"
 WORKDIR $PROJECT_PATH
 
@@ -21,11 +20,16 @@ ADD Makefile $PROJECT_PATH/Makefile
 
 ADD docker/configs/gunicorn.py.ini $PROJECT_PATH/gunicorn.py.ini
 ADD docker/start_app.sh $PROJECT_PATH/
+ADD docker/configs/nginx.conf /etc/nginx/sites-available/django_nginx.conf
+RUN ln -s /etc/nginx/sites-available/django_nginx.conf /etc/nginx/sites-enabled
+RUN rm /etc/nginx/sites-enabled/default
+RUN echo "daemon off;" >> /etc/nginx/nginx.conf
+
+
 RUN chmod +x $PROJECT_PATH/start_app.sh
 
 
 RUN mkdir -p $PROJECT_PATH/static
-RUN mkdir -p $PROJECT_PATH/logs
 
 ADD . $PROJECT_PATH/notejam
 
