@@ -4,6 +4,7 @@ MAINTAINER Bartlomiej Nogas <bart.nogas@gmail.com>
 
 # Install required packets via apt-get
 RUN apt-get update && apt-get install -y \
+    libmysqlclient-dev \
     nginx \
     python3-pip \
     python3-virtualenv \
