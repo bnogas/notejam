@@ -19,5 +19,11 @@ if [[ ! "$COUNT" =~ ^[0-9]+$ ]]; then
     echo "Invalid nodes count $COUNT"
     usage
 fi
-aws autoscaling  update-auto-scaling-group --auto-scaling-group-name notejam-${ENV}_asg --min-size ${COUNT} --max-size ${COUNT} --desired-capacity ${COUNT}
-aws ecs update-service --service "notejam-staging-svc" --cluster "notejam-staging-ecs" --desired-count ${COUNT}
+if [ "$COUNT" -eq "0" ]; then
+    COUNT_ASG=0
+else
+    COUNT_ASG=$(($COUNT+1))
+fi
+
+aws autoscaling  update-auto-scaling-group --auto-scaling-group-name notejam-${ENV}_asg --min-size ${COUNT_ASG} --max-size ${COUNT_ASG} --desired-capacity ${COUNT_ASG}
+aws ecs update-service --service "notejam-${ENV}-svc" --cluster "notejam-${ENV}-ecs" --desired-count ${COUNT}

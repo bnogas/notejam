@@ -6,7 +6,7 @@
       assign_public_ip: yes
       security_groups: ["{{ app_name }}"]
       image_id: "{{ ami_ecs_optimized }}"
-      instance_type: t2.micro
+      instance_type: "{{ instance_type }}"
       instance_profile_name: "ecsInstanceRole"
       user_data: |
         #!/bin/bash

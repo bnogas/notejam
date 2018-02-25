@@ -5,3 +5,6 @@ subnets: [
 app_name: "notejam-staging"
 vpc_net: 172.23.0.0/16
 backup_retention: 1
+instance_type: t2.micro
+container_memory: 400
+

@@ -79,7 +79,7 @@
       containers:
       - name: notejam
         essential: true
-        memory: 800
+        memory: "{{ container_memory }}"
         image: "{{ aws_account_id }}.dkr.ecr.{{ aws_region }}.amazonaws.com/notejam:latest"
         portMappings:
         - containerPort: 8000
