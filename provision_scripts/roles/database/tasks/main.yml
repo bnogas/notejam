@@ -37,6 +37,12 @@
       tags:
         Name: "{{ app_name }}"
     register: db
+  - name: "Create db replica"
+    rds:
+      command: replicate
+      instance_name: "{{ app_name }}-replica"
+      source_instance: "{{ app_name }}"
+      wait: no
   - name: "Set fact with db configuration file path"
     set_fact:
       db_config_file: "db_config-{{app_name}}.sh"
