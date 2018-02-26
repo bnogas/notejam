@@ -3,7 +3,7 @@ OP=$1
 ENV=$2
 SNAPSHOT=$3
 usage() {
-    echo "./db_snapshot.sh <ENV> <SNAPSHOT>"
+    echo "./db_snapshot.sh <OP> <ENV> <SNAPSHOT>"
     echo "Create/list or delete db snapshots"
     echo "OP - list|create|delete"
     echo "ENV - staging or prod"
