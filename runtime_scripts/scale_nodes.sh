@@ -11,6 +11,10 @@ usage() {
     exit
 }
 
+running_ec2_instances() {
+    echo $(aws ecs describe-clusters --cluster notejam-${ENV}-ecs | grep registeredContainerInstancesCount | sed -e "s:.*\([0-9]\+\).*:\1:g")
+}
+
 if [[ ! "$ENV" =~ ^(staging|prod)$ ]]; then
     echo "Invalid ENV $ENV"
     usage
@@ -21,4 +25,8 @@ if [[ ! "$COUNT" =~ ^[0-9]+$ ]]; then
 fi
 
 aws autoscaling  update-auto-scaling-group --auto-scaling-group-name notejam-${ENV}_asg --min-size ${COUNT} --max-size ${COUNT} --desired-capacity ${COUNT}
-aws ecs update-service --service "notejam-${ENV}-svc" --cluster "notejam-${ENV}-ecs" --desired-count ${COUNT}
+echo "Waiting for ec2 instances to be up"
+while [[ "$(running_ec2_instances)" -lt ${COUNT} ]]; do sleep 10; echo -n "." ;done
+echo
+echo "Done"
+aws ecs update-service --service "notejam-${ENV}-svc" --cluster "notejam-${ENV}-ecs" --desired-count ${COUNT} > /dev/null
