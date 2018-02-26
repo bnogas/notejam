@@ -15,3 +15,4 @@ elb_access_ids: ["033677994240"]
 pwd_alias: "{{ lookup('password', '/dev/null length=15 chars=ascii_letters') }}"
 size: 1
 key_dest: "~/.ssh/notejam-private.pem"
+lb_check_interval: 30

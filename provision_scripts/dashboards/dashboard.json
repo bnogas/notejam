@@ -1,0 +1,217 @@
+{
+    "widgets": [
+      {
+        "type": "metric",
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 6,
+        "properties": {
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [
+              "AWS/ELB",
+              "HTTPCode_ELB_5XX",
+              "LoadBalancerName",
+              "notejam-ENV-lb"
+            ],
+            [
+              ".",
+              "HTTPCode_Backend_3XX",
+              ".",
+              "."
+            ],
+            [
+              ".",
+              "HTTPCode_Backend_2XX",
+              ".",
+              "."
+            ],
+            [
+              ".",
+              "HTTPCode_Backend_4XX",
+              ".",
+              "."
+            ]
+          ],
+          "region": "us-east-2",
+          "title": "HTTP response codes: Backend"
+        }
+      },
+      {
+        "type": "metric",
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 6,
+        "properties": {
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [
+              "AWS/ELB",
+              "RequestCount",
+              "LoadBalancerName",
+              "notejam-ENV-lb",
+              {
+                "stat": "Sum"
+              }
+            ],
+            [
+              ".",
+              "BackendConnectionErrors",
+              ".",
+              ".",
+              {
+                "stat": "Sum"
+              }
+            ]
+          ],
+          "region": "us-east-2",
+          "title": "ELB - RequestCount",
+          "period": 300
+        }
+      },
+      {
+        "type": "metric",
+        "x": 12,
+        "y": 0,
+        "width": 6,
+        "height": 6,
+        "properties": {
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [
+              "AWS/ELB",
+              "HealthyHostCount",
+              "LoadBalancerName",
+              "notejam-ENV-lb"
+            ]
+          ],
+          "region": "us-east-2"
+        }
+      },
+      {
+        "type": "metric",
+        "x": 18,
+        "y": 0,
+        "width": 6,
+        "height": 6,
+        "properties": {
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [
+              "AWS/ELB",
+              "EstimatedProcessedBytes",
+              "LoadBalancerName",
+              "notejam-ENV-lb"
+            ]
+          ],
+          "region": "us-east-2"
+        }
+      },
+      {
+        "type": "metric",
+        "x": 0,
+        "y": 6,
+        "width": 6,
+        "height": 6,
+        "properties": {
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [
+              "AWS/RDS",
+              "ReadLatency",
+              "DBInstanceIdentifier",
+              "notejam-ENV"
+            ],
+            [
+              ".",
+              "WriteLatency",
+              ".",
+              "."
+            ]
+          ],
+          "region": "us-east-2",
+          "title": "DB ReadLatency, WriteLatency",
+          "period": 300
+        }
+      },
+      {
+        "type": "metric",
+        "x": 6,
+        "y": 6,
+        "width": 6,
+        "height": 6,
+        "properties": {
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [
+              "AWS/RDS",
+              "ReadIOPS",
+              "DBInstanceIdentifier",
+              "notejam-ENV"
+            ],
+            [
+              ".",
+              "WriteIOPS",
+              ".",
+              "."
+            ]
+          ],
+          "region": "us-east-2"
+        }
+      },
+      {
+        "type": "metric",
+        "x": 18,
+        "y": 6,
+        "width": 6,
+        "height": 6,
+        "properties": {
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [
+              "AWS/ECS",
+              "MemoryUtilization",
+              "ServiceName",
+              "notejam-ENV-svc",
+              "ClusterName",
+              "notejam-ENV-ecs"
+            ]
+          ],
+          "region": "us-east-2",
+          "title": "WEB MemoryUtilization"
+        }
+      },
+      {
+        "type": "metric",
+        "x": 12,
+        "y": 6,
+        "width": 6,
+        "height": 6,
+        "properties": {
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [
+              "AWS/ECS",
+              "CPUUtilization",
+              "ServiceName",
+              "notejam-ENV-svc",
+              "ClusterName",
+              "notejam-ENV-ecs"
+            ]
+          ],
+          "region": "us-east-2",
+          "title": "WEB CPUUtilization"
+        }
+      }
+    ]
+}
