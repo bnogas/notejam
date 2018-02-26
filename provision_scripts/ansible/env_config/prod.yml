@@ -1,9 +1,0 @@
----
-subnets: [
-    {cidr: 172.24.0.0/24, region: us-east-2, az: us-east-2a},
-    {cidr: 172.24.1.0/24, region: us-east-2, az: us-east-2b}]
-app_name: "notejam-prod"
-vpc_net: 172.24.0.0/16
-backup_retention: 7
-instance_type: t2.micro
-container_memory: 400

@@ -1,0 +1,26 @@
+---
+- name: Create AWS entironment
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - ec2_key
+    - vpc
+
+- name: Create Load Balancer
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - lb
+
+- name: Create MySQL database
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - database
+
+- name: Create web-tier instances
+  hosts: localhost
+  roles:
+    - ecs_cluster
+    - asg
+    - ecs_service

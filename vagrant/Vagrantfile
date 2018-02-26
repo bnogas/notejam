@@ -9,7 +9,7 @@ Vagrant.configure(2) do |config|
     web.vm.network "forwarded_port", guest: 8000, host: 8000
     web.vm.synced_folder "../", "/home/vagrant/notejam"
     web.vm.provision "ansible" do |ansible|
-      ansible.playbook = "../provision_scripts/vagrant.yml"
+      ansible.playbook = "provision.yml"
       ansible.verbose = "y"
     end
 

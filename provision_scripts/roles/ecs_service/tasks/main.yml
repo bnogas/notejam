@@ -5,6 +5,9 @@
       parameter_store_bucket: "{{app_name}}-ps"
       parameter_store_role: "{{app_name}}-ps"
       parameter_store_policy: "{{app_name}}-ps-policy"
+  - name: "Create log group for {{ app_name }}"
+    command: "aws logs create-log-group --log-group-name {{ app_name }} --region {{ aws_region }}"
+    ignore_errors: true
   - name: "Create bucket {{ parameter_store_bucket }}"
     aws_s3:
       bucket: "{{ parameter_store_bucket }}"
@@ -58,7 +61,7 @@
       overwrite: true
       mode: put
     when: db.changed
-  - name: "Save credentials to db to a file"
+  - name: "Save initial admin password to a file"
     copy:
       content: |
         export INIT_ADMIN_PASSWORD={{ pwd_alias }}
