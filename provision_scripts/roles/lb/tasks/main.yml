@@ -17,28 +17,38 @@
         to_port: 80
         cidr_ip: 0.0.0.0/0
     register: public_http_group
-  - name: "Set fact with load balancer name {{ app_name}}-lb"
+  - name: "Set fact with load balancer name {{ app_name}}"
     set_fact:
       lb_name: "{{app_name}}-lb"
-  - name: "Create lb configuration - {{ app_name }}"
-    ec2_elb_lb:
-      name: "{{ lb_name }}"
+      lb_target_group_name: "{{ app_name }}-target-group"
+  - name: Create LB target group
+    elb_target_group:
+      name: "{{app_name}}-target-group"
+      protocol: http
+      port: 80
+      vpc_id: "{{ vpc_id }}"
+      health_check_path: "/status/ping"
+      successful_response_codes: "200"
+      health_check_interval: "{{ lb_check_interval }}"
       state: present
+    register: elb_tg
+  - name: "Set fact with lb target group arn"
+    set_fact:
+      lb_target_group_arn: "{{ elb_tg.target_group_arn }}"
+  - name: "Create lb configuration - {{ app_name }}"
+    elb_application_lb:
+      access_logs_enabled: yes
+      access_logs_s3_bucket: "{{ app_name }}-logs"
+      access_logs_s3_prefix: "lb"
+      name: "{{ lb_name }}"
+      security_groups:
+        - "{{ public_http_group.group_id }}"
       subnets: "{{ vpc_subnets_ids }}"
-      security_group_ids: ["{{ public_http_group.group_id }}"]
       listeners:
-        - protocol: http
-          load_balancer_port: 80
-          instance_port: 80
-      health_check:
-        ping_protocol: http
-        ping_port: 80
-        ping_path: "/status/ping"
-        response_timeout: 5
-        interval: "{{ lb_check_interval }}"
-        unhealthy_threshold: 2
-        healthy_threshold: 10
-      access_logs:
-        s3_location: "{{ app_name }}-logs"
-        s3_prefix: "lb"
+        - Protocol: HTTP
+          Port: 80
+          DefaultActions:
+            - Type: forward
+              TargetGroupName: "{{ lb_target_group_name }}"
+      state: present
 

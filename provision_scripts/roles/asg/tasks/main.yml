@@ -22,10 +22,10 @@
       launch_config_name: "{{ app_name }}_lc"
       health_check_period: 60
       health_check_type: ELB
-      min_size: "{{ size + 1 }}"
-      max_size: "{{ size + 1 }}"
+      min_size: "{{ size  }}"
+      max_size: "{{ size  }}"
       vpc_zone_identifier: "{{ vpc_subnets_ids}}"
-      desired_capacity: "{{ size + 1 }}"
+      desired_capacity: "{{ size  }}"
       wait_for_instances: true
       tags: [{ecs_cluster: "{{ ecs_cluster_name }}"}]
 

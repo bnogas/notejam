@@ -86,7 +86,7 @@
         image: "{{ aws_account_id }}.dkr.ecr.{{ aws_region }}.amazonaws.com/notejam:latest"
         portMappings:
         - containerPort: 8000
-          hostPort: 80
+          hostPort: 0
         logConfiguration:
           logDriver: "awslogs"
           options:
@@ -101,7 +101,7 @@
       desired_count: 2
       task_definition: "{{ app_name }}"
       load_balancers: [
-        {loadBalancerName: "{{ lb_name }}", containerName: notejam, containerPort: 8000 }
+        {targetGroupArn: "{{ lb_target_group_arn }}", containerName: notejam, containerPort: 8000 }
       ]
       role: "arn:aws:iam::{{ aws_account_id }}:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS"
 
